@@ -1,40 +1,16 @@
 package es.iesquevedo.service;
 
 import es.iesquevedo.modelo.Cliente;
-import es.iesquevedo.dao.ClienteRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ClienteService {
-    private final ClienteRepository repositorio;
+public interface ClienteService {
+    List<Cliente> obtenerTodos();
 
-    public ClienteService() {
-        this.repositorio = new ClienteRepository();
-    }
+    Optional<Cliente> buscarPorCodigo(String codigo);
 
-    public List<Cliente> obtenerTodos() {
-        return repositorio.obtenerTodos();
-    }
+    boolean registrarCliente(Cliente cliente);
 
-    public Optional<Cliente> buscarPorCodigo(String codigo) {
-        return repositorio.buscarPorCodigo(codigo);
-    }
-
-    public boolean registrarCliente(Cliente cliente) {
-        if (cliente.getCodigo() == null || cliente.getCodigo().isBlank()) {
-            return false;
-        }
-        if (cliente.getNombreCompleto() == null || cliente.getNombreCompleto().isBlank()) {
-            return false;
-        }
-        if (cliente.getEmail() == null || cliente.getEmail().isBlank()) {
-            return false;
-        }
-        return repositorio.insertar(cliente);
-    }
-
-    public boolean eliminarCliente(String codigo) {
-        return repositorio.eliminarPorCodigo(codigo);
-    }
+    boolean eliminarCliente(String codigo);
 }

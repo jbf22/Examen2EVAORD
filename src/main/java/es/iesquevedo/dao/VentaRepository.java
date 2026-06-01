@@ -1,97 +1,31 @@
 package es.iesquevedo.dao;
 
-import com.google.gson.reflect.TypeToken;
 import es.iesquevedo.modelo.Venta;
-import es.iesquevedo.util.GsonFactory;
+import es.iesquevedo.service.VentaService;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class VentaRepository {
-    private final Path archivoVentas;
-    private final Type tipoLista = new TypeToken<List<Venta>>(){}.getType();
-    private List<Venta> ventas = new ArrayList<>();
+public interface VentaRepository extends VentaService {
+    void cargarDatos();
 
-    public VentaRepository() {
-        this.archivoVentas = Path.of("data", "ventas.json");
-        cargarDatos();
+    void guardarDatos();
+
+    List<Venta> obtenerTodas();
+
+    Optional<Venta> buscarPorNumero(String numeroVenta);
+
+    @Override
+    default boolean procesarVenta(Venta venta) {
+        return false;
     }
 
-    private void cargarDatos() {
-        try {
-            if (Files.notExists(archivoVentas.getParent())) {
-                Files.createDirectories(archivoVentas.getParent());
-            }
-            if (Files.notExists(archivoVentas)) {
-                Files.writeString(archivoVentas, "[]");
-            }
-            String contenidoJson = Files.readString(archivoVentas);
-            List<Venta> listaCargada = GsonFactory.getGson().fromJson(contenidoJson, tipoLista);
-            if (listaCargada != null) {
-                ventas = listaCargada;
-            }
-        } catch (IOException error) {
-            System.err.println("Error al cargar ventas: " + error.getMessage());
-        }
+    @Override
+    default boolean cancelarVenta(String numeroVenta) {
+        return false;
     }
 
-    private void guardarDatos() {
-        try {
-            String jsonVentas = GsonFactory.getGson().toJson(ventas, tipoLista);
-            Files.writeString(archivoVentas, jsonVentas);
-        } catch (IOException error) {
-            System.err.println("Error al guardar ventas: " + error.getMessage());
-        }
-    }
+    boolean insertar(Venta nuevaVenta);
 
-    public List<Venta> obtenerTodas() {
-        cargarDatos();
-        List<Venta> resultado = new ArrayList<>();
-        for (Venta v : ventas) {
-            resultado.add(v);
-        }
-        return resultado;
-    }
-
-    public Optional<Venta> buscarPorNumero(String numeroVenta) {
-        cargarDatos();
-        for (Venta v : ventas) {
-            if (v.getNumeroVenta().equals(numeroVenta)) {
-                return Optional.of(v);
-            }
-        }
-        return Optional.empty();
-    }
-
-    public boolean insertar(Venta nuevaVenta) {
-        cargarDatos();
-        Optional<Venta> existente = buscarPorNumero(nuevaVenta.getNumeroVenta());
-        if (existente.isPresent()) {
-            return false;
-        }
-        ventas.add(nuevaVenta);
-        guardarDatos();
-        return true;
-    }
-
-    public boolean eliminarPorNumero(String numeroVenta) {
-        cargarDatos();
-        boolean eliminado = false;
-        for (int i = 0; i < ventas.size(); i++) {
-            if (ventas.get(i).getNumeroVenta().equals(numeroVenta)) {
-                ventas.remove(i);
-                eliminado = true;
-                break;
-            }
-        }
-        if (eliminado) {
-            guardarDatos();
-        }
-        return eliminado;
-    }
+    boolean eliminarPorNumero(String numeroVenta);
 }
