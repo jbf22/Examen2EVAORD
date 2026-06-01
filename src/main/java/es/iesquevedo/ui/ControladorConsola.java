@@ -3,9 +3,7 @@ package es.iesquevedo.ui;
 import es.iesquevedo.modelo.Venta;
 import es.iesquevedo.modelo.Videojuego;
 import es.iesquevedo.modelo.Cliente;
-import es.iesquevedo.service.VentaService;
-import es.iesquevedo.service.VideojuegoService;
-import es.iesquevedo.service.ClienteService;
+import es.iesquevedo.service.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,11 +16,11 @@ public class ControladorConsola {
     private final ClienteService servicioClientes;
     private final VentaService servicioVentas;
 
-    public ControladorConsola(Scanner entrada) {
+    public ControladorConsola(Scanner entrada, ClienteService servicioClientes, VentaService servicioVentas, VideojuegoService servicioVideojuegos) {
         this.entrada = entrada;
-        this.servicioVideojuegos = new VideojuegoService();
-        this.servicioClientes = new ClienteService();
-        this.servicioVentas = new VentaService();
+        this.servicioClientes = servicioClientes;
+        this.servicioVentas = servicioVentas;
+        this.servicioVideojuegos = servicioVideojuegos;
     }
 
     public void menuVideojuegos() {

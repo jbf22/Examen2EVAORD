@@ -1,79 +1,16 @@
 package es.iesquevedo.service;
 
 import es.iesquevedo.modelo.Venta;
-import es.iesquevedo.modelo.Videojuego;
-import es.iesquevedo.modelo.Cliente;
-import es.iesquevedo.dao.VentaRepository;
-import es.iesquevedo.dao.VideojuegoRepository;
-import es.iesquevedo.dao.ClienteRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public class VentaService {
-    private final VentaRepository repositorioVentas;
-    private final VideojuegoRepository repositorioVideojuegos;
-    private final ClienteRepository repositorioClientes;
+public interface VentaService {
+    List<Venta> obtenerTodas();
 
-    public VentaService() {
-        this.repositorioVentas = new VentaRepository();
-        this.repositorioVideojuegos = new VideojuegoRepository();
-        this.repositorioClientes = new ClienteRepository();
-    }
+    Optional<Venta> buscarPorNumero(String numeroVenta);
 
-    public List<Venta> obtenerTodas() {
-        return repositorioVentas.obtenerTodas();
-    }
+    boolean procesarVenta(Venta venta);
 
-    public Optional<Venta> buscarPorNumero(String numeroVenta) {
-        return repositorioVentas.buscarPorNumero(numeroVenta);
-    }
-
-    public boolean procesarVenta(Venta venta) {
-        if (venta.getNumeroVenta() == null || venta.getNumeroVenta().isBlank()) {
-            return false;
-        }
-        if (venta.getCantidadUnidades() <= 0) {
-            return false;
-        }
-
-        Optional<Cliente> clienteOpt = repositorioClientes.buscarPorCodigo(venta.getCodigoCliente());
-        if (clienteOpt.isEmpty()) {
-            return false;
-        }
-
-        Optional<Videojuego> videojuegoOpt = repositorioVideojuegos.buscarPorCodigo(venta.getCodigoVideojuego());
-        if (videojuegoOpt.isEmpty()) {
-            return false;
-        }
-
-        Videojuego videojuego = videojuegoOpt.get();
-        if (videojuego.getStock() < venta.getCantidadUnidades()) {
-            return false;
-        }
-
-        int nuevoStock = videojuego.getStock() - venta.getCantidadUnidades();
-        videojuego.setStock(nuevoStock);
-        repositorioVideojuegos.modificar(videojuego);
-
-        return repositorioVentas.insertar(venta);
-    }
-
-    public boolean cancelarVenta(String numeroVenta) {
-        Optional<Venta> ventaOpt = repositorioVentas.buscarPorNumero(numeroVenta);
-        if (ventaOpt.isEmpty()) {
-            return false;
-        }
-
-        Venta venta = ventaOpt.get();
-        Optional<Videojuego> videojuegoOpt = repositorioVideojuegos.buscarPorCodigo(venta.getCodigoVideojuego());
-        if (videojuegoOpt.isPresent()) {
-            Videojuego videojuego = videojuegoOpt.get();
-            int stockRecuperado = videojuego.getStock() + venta.getCantidadUnidades();
-            videojuego.setStock(stockRecuperado);
-            repositorioVideojuegos.modificar(videojuego);
-        }
-
-        return repositorioVentas.eliminarPorNumero(numeroVenta);
-    }
+    boolean cancelarVenta(String numeroVenta);
 }
